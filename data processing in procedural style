@@ -1,0 +1,59 @@
+import csv
+import os
+
+location = os.path.realpath(os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+def load_data(filename):
+    with open(os.path.join(location, filename)) as f:
+        return [dict(row) for row in csv.DictReader(f)]
+
+def calculate_average(temps):
+    return sum(temps) / len(temps) if temps else 0
+
+def get_temperatures_by_country(cities, country):
+    return [float(city['temperature']) for city in cities if city['country'] == country]
+
+def print_average_temperature(cities):
+    temps = [float(city['temperature']) for city in cities]
+    print("The average temperature of all the cities:", calculate_average(temps))
+
+def print_cities_in_country(cities, country):
+    city_names = [city['city'] for city in cities if city['country'] == country]
+    print(f"All the cities in {country}: {city_names}")
+
+def print_temperature_stats_for_country(cities, country):
+    temps = get_temperatures_by_country(cities, country)
+    print(f"The average temperature of all the cities in {country}: {calculate_average(temps)}")
+    print(f"The max temperature of all the cities in {country}: {max(temps) if temps else 'N/A'}")
+    print(f"The min temperature of all the cities in {country}: {min(temps) if temps else 'N/A'}")
+
+def filter_cities(condition, cities):
+    return [city for city in cities if condition(city)]
+
+def aggregate_data(aggregation_key, aggregation_function, cities):
+    values = [float(city[aggregation_key]) for city in cities if aggregation_key in city]
+    return aggregation_function(values) if values else None
+
+cities = load_data('Cities.csv')
+countries = load_data('Countries.csv')
+
+print_average_temperature(cities)
+print()
+
+print_cities_in_country(cities, 'Italy')
+print()
+
+print_temperature_stats_for_country(cities, 'Italy')
+print()
+
+filtered_cities = filter_cities(lambda city: float(city['latitude']) >= 60.0, cities)
+print("Cities with latitude >= 60.0:")
+for city in filtered_cities:
+    print(city)
+print()
+
+
+print("Average temperature for all cities in Italy:", aggregate_data('temperature', calculate_average, filter_cities(lambda c: c['country'] == 'Italy', cities)))
+print("Average temperature for all cities in Sweden:", aggregate_data('temperature', calculate_average, filter_cities(lambda c: c['country'] == 'Sweden', cities)))
+print("Min temperature for all cities in Italy:", aggregate_data('temperature', min, filter_cities(lambda c: c['country'] == 'Italy', cities)))
+print("Max temperature for all cities in Sweden:", aggregate_data('temperature', max, filter_cities(lambda c: c['country'] == 'Sweden', cities)))
