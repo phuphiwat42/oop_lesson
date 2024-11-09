@@ -1,0 +1,74 @@
+class Account:
+    def __init__(self,account_number,type,name,balance):
+        self.name = name
+        self.account_number = account_number
+        self.type = type
+        self.balance = balance
+
+    def deposit(self, amount):
+        self.balance += amount
+
+    def withdraw(self, amount):
+        if self.balance >= amount:
+            self.balance -= amount
+
+    def __str__(self):
+        return '{' + str(self.account_number) + ',' + str(self.type) + ',' + str(self.name) + ',' + str(
+            self.balance) + '}'
+
+class AccountDB:
+    def __init__(self):
+        self.account_database = []
+
+    def insert(self, account):
+        index = self.__search_private(account.account_number)
+        if index == -1:
+            self.account_database.append(account)
+        else:
+            print(account, "Duplicated account; nothing to be insert")
+
+    def __search_private(self, account_num):
+        for i in range(len(self.account_database)):
+            if self.account_database[i].account_number == account_num:
+                return i
+        return -1
+
+    def search_public(self, account_num):
+        for account in self.account_database:
+            if account.account_number == account_num:
+                return account
+        return None
+    def delete(self, account_num):
+        index = self.__search_private(account_num)
+        if index != -1:
+            deleted = self.account_database.pop(index)
+            print(f"Account {deleted.account_number} deleted")
+        else:
+            print(f"Account not found {account_num}")
+
+    def __str__(self):
+        account_detail =  "Detail':"
+        for account in self.account_database:
+            account_detail += str(account)
+        return account_detail
+
+
+
+
+account1 = Account("0000", "2", "Tata", 200)
+account2 = Account("0001","1","Tatarr",300)
+account3 = Account("0002", "2","Ttar",500)
+
+insert_account = AccountDB()
+insert_account.insert(account1)
+insert_account.insert(account2)
+insert_account.insert(account3)
+print(insert_account)
+insert_account.search_public("0001").deposit(50)
+print(insert_account)
+insert_account.search_public("0002").withdraw(20)
+print(insert_account)
+insert_account.search_public("0000").deposit(50)
+print(insert_account)
+insert_account.delete("0000")
+print(insert_account)
